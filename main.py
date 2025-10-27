@@ -20,18 +20,10 @@ app = FastAPI(
     description="Hospital Management System API",
 )
 
-# Configure CORS - Allow development environments
+# Configure CORS - Allow development and production environments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        settings.FRONTEND_URL,
-        "http://localhost:3000",
-        "http://localhost:5173",  # Vite default port
-        "http://localhost:5174",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-    ],
+    allow_origins=settings.get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,8 +41,10 @@ def on_startup():
     init_db()
     print(f"✅ Database initialized")
     print(f"✅ {settings.APP_NAME} v{settings.VERSION} is running")
+    print(f"✅ Environment: {settings.ENVIRONMENT}")
     print(f"✅ API available at: http://{settings.API_HOST}:{settings.API_PORT}")
     print(f"✅ Authentication enabled with JWT")
+    print(f"✅ CORS Origins: {', '.join(settings.get_cors_origins()[:3])}...")
 
 
 # Root endpoint
@@ -59,15 +53,20 @@ def root():
     return {
         "message": f"Welcome to {settings.APP_NAME} API",
         "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
         "docs": "/docs",
         "redoc": "/redoc"
     }
 
 
-# Health check
+# Health check endpoint for Railway
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "version": settings.VERSION}
+    return {
+        "status": "healthy",
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT
+    }
 
 
 # ========== PATIENT ENDPOINTS ==========
