@@ -5,6 +5,7 @@ from functools import lru_cache
 class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "mysql+pymysql://root:password@localhost:3306/hospital_db"
+    DATABASE_SSL: bool = False  # Enable when using managed MySQL that requires TLS (e.g., Railway)
     
     # API
     API_HOST: str = "0.0.0.0"

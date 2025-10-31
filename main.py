@@ -38,8 +38,22 @@ app.include_router(routes_auth.router)
 # Initialize database on startup
 @app.on_event("startup")
 def on_startup():
-    init_db()
-    print(f"✅ Database initialized")
+    try:
+        init_db()
+        print(f"✅ Database initialized")
+    except Exception as e:
+        error_msg = str(e)
+        print(f"⚠️  Database initialization failed: {type(e).__name__}")
+        if "Access denied" in error_msg:
+            print(f"\n💡 MySQL Connection Error!")
+            print(f"   The backend will start, but login/registration won't work until MySQL is configured.")
+            print(f"\n   To fix:")
+            print(f"   1. Verify MySQL root password in backend/.env")
+            print(f"   2. Run: connect-mysql.bat (to create database)")
+            print(f"   3. Or manually: CREATE DATABASE hospital_db;")
+        else:
+            print(f"   Error: {error_msg}")
+    
     print(f"✅ {settings.APP_NAME} v{settings.VERSION} is running")
     print(f"✅ Environment: {settings.ENVIRONMENT}")
     print(f"✅ API available at: http://{settings.API_HOST}:{settings.API_PORT}")
